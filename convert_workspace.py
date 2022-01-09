@@ -113,6 +113,7 @@ if __name__ == "__main__":
     output_dir = args.output_dir
     users_path = args.users_path
     verbose = args.verbose
+    merged_type = args.output_file_type
 
     output_dir = Path(output_dir) if output_dir else input_dir.parent / "converted"
     output_dir.mkdir(exist_ok=True)
@@ -140,4 +141,4 @@ if __name__ == "__main__":
     pbar.close()
 
     # aggregate all csv files in the output directory into a single csv file
-    aggregate_CSVs(csv_dir=output_dir, output_loc=output_dir, output_file_type="excel")
+    aggregate_CSVs(csv_dir=output_dir, output_loc=output_dir, output_file_type=merged_type)
