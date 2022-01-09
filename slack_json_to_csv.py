@@ -5,7 +5,7 @@ from datetime import datetime
 from cleantext import clean
 from tqdm.auto import tqdm
 import pandas as pd
-
+from os.path import basename
 
 def remove_string_extras(mytext):
     # removes everything from a string except A-Za-z0-9 .,;
@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     content_list = []
     userlist = []
-    f = open(outcsv_file, "w")
+    f = open(outcsv_file, "w", encoding='utf-8', errors='ignore')
     user = {}
     with open(userjson, "r", errors="replace") as user_data:
         userlist = json.load(user_data)
@@ -107,21 +107,14 @@ if __name__ == "__main__":
                     ts = datetime.utcfromtimestamp(float(item["ts"]))
                     time = clean(ts.strftime("%Y-%m-%d %H:%M:%S"))
                     text = clean(transform_text(item["text"]))
-                    channel = clean(item["channel"]) if "channel" in item.keys() else ""
-                    csvwriter.writerow(
-                        [
-                            time.encode("utf-8"),
-                            user.encode("utf-8"),
-                            text.encode("utf-8"),
-                            channel.encode("utf-8"),
-                        ]
-                    )
+                    channel = clean(item["channel"]) if "channel" in item.keys() else basename(jsondir)
+                    csvwriter.writerow([time, user, text, channel])
         pbar.update(1)
     pbar.close()
 
     if verbose:
 
-        df = pd.read_csv(outcsv_file)
+        df = pd.read_csv(outcsv_file, quoting=csv.QUOTE_MINIMAL)
         print(f"A preview of the generated dataframe is:\n{df.head()}")
 
     f.close()
