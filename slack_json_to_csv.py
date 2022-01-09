@@ -10,7 +10,8 @@ from tqdm.auto import tqdm
 import pandas as pd
 from os.path import basename
 
-def remove_string_extras(mytext:str):
+
+def remove_string_extras(mytext: str):
     """
     remove_string_extras - removes extra characters from a string. everything except A-Za-z0-9 .,;
     """
@@ -45,7 +46,7 @@ def handle_mention(matchobj):
     return "@{}".format(matched_user)
 
 
-def transform_text(text:str):
+def transform_text(text: str):
     """
     transform_text - transforms the text of a message into a more readable format
     """
@@ -69,7 +70,7 @@ if __name__ == "__main__":
 
     content_list = []
     userlist = []
-    f = open(outcsv_file, "w", encoding='utf-8', errors='ignore')
+    f = open(outcsv_file, "w", encoding="utf-8", errors="ignore")
     user = {}
     with open(userjson, "r", errors="replace") as user_data:
         userlist = json.load(user_data)
@@ -89,8 +90,9 @@ if __name__ == "__main__":
             print(f"KeyError: {e}\n\n User data: {userid}")
             sys.exit(1)
 
-    if verbose: print("\n\tfinished loading user data\n")
-    exclude_types = ["bot_message", "channel_join"]
+    if verbose:
+        print("\n\tfinished loading user data\n")
+    exclude_types = ["bot_message", "channel_join"] # types to exclude from the csv file (e.g. bot messages)
     csvwriter = csv.writer(
         f, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL, lineterminator="\n"
     )
@@ -123,7 +125,11 @@ if __name__ == "__main__":
                     ts = datetime.utcfromtimestamp(float(item["ts"]))
                     time = clean(ts.strftime("%Y-%m-%d %H:%M:%S"))
                     text = clean(transform_text(item["text"]))
-                    channel = clean(item["channel"]) if "channel" in item.keys() else basename(jsondir)
+                    channel = (
+                        clean(item["channel"])
+                        if "channel" in item.keys()
+                        else basename(jsondir)
+                    )
                     csvwriter.writerow([time, user, text, channel])
         pbar.update(1)
     pbar.close()
