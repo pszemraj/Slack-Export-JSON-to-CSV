@@ -1,3 +1,6 @@
+"""
+slack_json_to_csv.py - given a directory of slack json files, converts them to a csv file. is executable.
+"""
 import json, sys
 import os, csv
 import re
@@ -7,24 +10,34 @@ from tqdm.auto import tqdm
 import pandas as pd
 from os.path import basename
 
-def remove_string_extras(mytext):
-    # removes everything from a string except A-Za-z0-9 .,;
+def remove_string_extras(mytext:str):
+    """
+    remove_string_extras - removes extra characters from a string. everything except A-Za-z0-9 .,;
+    """
     return re.sub(r"[^A-Za-z0-9 .,;]+", "", mytext)
 
 
 def corr(s):
-    # adds space after period if there isn't one
-    # removes extra spaces
+    """
+    corr - adds space after period if there isn't one and adds spaces if needed
+    """
     return re.sub(r"\.(?! )", ". ", re.sub(r" +", " ", s))
 
 
 def handle_annotated_mention(matchobj):
+    """
+    handle_annotated_mention - handles the case where a mention is annotated with a user id
+    """
+    global user
     if isinstance(matchobj, list):
         matchobj = "".join(matchobj)
     return "@{}".format((matchobj.group(0)[2:-1]).split("|")[1])
 
 
 def handle_mention(matchobj):
+    """
+    handle_mention - handles the general case where a mention is not annotated with a user id
+    """
     global user
     if isinstance(matchobj, list):
         matchobj = "".join(matchobj)
@@ -32,7 +45,10 @@ def handle_mention(matchobj):
     return "@{}".format(matched_user)
 
 
-def transform_text(text):
+def transform_text(text:str):
+    """
+    transform_text - transforms the text of a message into a more readable format
+    """
     text = text.replace("<!channel>", "@channel")
     text = text.replace("&gt;", ">")
     text = text.replace("&amp;", "&")
@@ -73,7 +89,7 @@ if __name__ == "__main__":
             print(f"KeyError: {e}\n\n User data: {userid}")
             sys.exit(1)
 
-    print("\n\tfinished loading user data\n")
+    if verbose: print("\n\tfinished loading user data\n")
     exclude_types = ["bot_message", "channel_join"]
     csvwriter = csv.writer(
         f, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL, lineterminator="\n"
