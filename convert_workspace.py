@@ -13,7 +13,7 @@ from tqdm.auto import tqdm
 logdir = Path.cwd() / "logs"
 logdir.mkdir(parents=True, exist_ok=True)
 logging.basicConfig(
-    filename="./out/conversion_logs.csv",
+    filename="./logs/conversion_logs.csv",
     level=logging.INFO,
     datefmt="%m/%d/%Y %I:%M:%S %p",
 )
