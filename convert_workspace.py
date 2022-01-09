@@ -38,6 +38,7 @@ def aggregate_CSVs(csv_dir: Path, output_loc: Path, output_file_type: str = "exc
         df.to_csv(agg_loc, index=False)
     elif output_file_type == "feather":
         agg_loc = output_loc.parent / f"{agg_name}.ftr"
+        df.reset_index(inplace=True)
         df.to_feather(agg_loc)
     else:
         raise ValueError(
