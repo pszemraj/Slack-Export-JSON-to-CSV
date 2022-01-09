@@ -12,9 +12,14 @@ from tqdm.auto import tqdm
 
 logdir = Path.cwd() / "logs"
 logdir.mkdir(parents=True, exist_ok=True)
-logging.basicConfig(filename="./out/conversion_logs.csv", level=logging.INFO,  datefmt="%m/%d/%Y %I:%M:%S %p",)
+logging.basicConfig(
+    filename="./out/conversion_logs.csv",
+    level=logging.INFO,
+    datefmt="%m/%d/%Y %I:%M:%S %p",
+)
 
-def aggregate_CSVs(csv_dir: Path, output_loc: Path, output_file_type:str="excel"):
+
+def aggregate_CSVs(csv_dir: Path, output_loc: Path, output_file_type: str = "excel"):
     """
     aggregate_CSVs - aggregates all csv files in a directory into a single csv file
     """
@@ -23,20 +28,21 @@ def aggregate_CSVs(csv_dir: Path, output_loc: Path, output_file_type:str="excel"
     for csv_file in csv_files:
         df = df.append(pd.read_csv(csv_file))
 
-
     agg_name = f"aggregated_{csv_dir.name}{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
     if output_file_type == "excel":
-         agg_loc = output_loc.parent / f"{agg_name}.xlsx"
-         df.to_excel(agg_loc, index=False)
+        agg_loc = output_loc.parent / f"{agg_name}.xlsx"
+        df.to_excel(agg_loc, index=False)
     elif output_file_type == "csv":
-         agg_loc = output_loc.parent / f"{agg_name}.csv"
-         df.to_csv(agg_loc, index=False)
+        agg_loc = output_loc.parent / f"{agg_name}.csv"
+        df.to_csv(agg_loc, index=False)
     elif output_file_type == "feather":
-         agg_loc = output_loc.parent / f"{agg_name}.ftr"
-         df.to_feather(agg_loc)
+        agg_loc = output_loc.parent / f"{agg_name}.ftr"
+        df.to_feather(agg_loc)
     else:
-         raise ValueError(f"{output_file_type} is not a valid output file type. Please use 'excel', 'csv', or 'feather'")
+        raise ValueError(
+            f"{output_file_type} is not a valid output file type. Please use 'excel', 'csv', or 'feather'"
+        )
 
     print(f"{agg_loc} created")
 
@@ -65,7 +71,7 @@ def get_parser():
         "--output-dir",
         required=False,
         type=str,
-        default=None, # by default, output will be in the same directory as the input
+        default=None,  # by default, output will be in the same directory as the input
         help="enter the directory where you want the csv file to be saved",
     )
     parser.add_argument(
@@ -135,5 +141,3 @@ if __name__ == "__main__":
 
     # aggregate all csv files in the output directory into a single csv file
     aggregate_CSVs(csv_dir=output_dir, output_loc=output_dir, output_file_type="excel")
-
-

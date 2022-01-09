@@ -92,7 +92,10 @@ if __name__ == "__main__":
 
     if verbose:
         print("\n\tfinished loading user data\n")
-    exclude_types = ["bot_message", "channel_join"] # types to exclude from the csv file (e.g. bot messages)
+    exclude_types = [
+        "bot_message",
+        "channel_join",
+    ]  # types to exclude from the csv file (e.g. bot messages)
     csvwriter = csv.writer(
         f, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL, lineterminator="\n"
     )
