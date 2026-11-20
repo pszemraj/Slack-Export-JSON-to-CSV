@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 import logging
 import subprocess
+import sys
 import pandas as pd
 from tqdm.auto import tqdm
 
@@ -24,9 +25,8 @@ def aggregate_CSVs(csv_dir: Path, output_loc: Path, output_file_type: str = "exc
     aggregate_CSVs - aggregates all csv files in a directory into a single csv file
     """
     csv_files = [f for f in csv_dir.iterdir() if f.is_file() and f.suffix == ".csv"]
-    df = pd.DataFrame()
-    for csv_file in csv_files:
-        df = df.append(pd.read_csv(csv_file))
+    frames = [pd.read_csv(csv_file) for csv_file in csv_files]
+    df = pd.concat(frames) if frames else pd.DataFrame()
 
     agg_name = f"aggregated_{csv_dir.name}{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
@@ -130,8 +130,8 @@ if __name__ == "__main__":
         _channel_out = output_dir / f"{channel.name}.csv"
         subprocess.run(
             [
-                "python3",
-                "slack_json_to_csv.py",
+                sys.executable,
+                str(Path(__file__).resolve().with_name("slack_json_to_csv.py")),
                 str(channel),
                 str(users_path),
                 _channel_out,

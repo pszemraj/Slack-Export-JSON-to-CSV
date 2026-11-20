@@ -4,7 +4,7 @@ slack_json_to_csv.py - given a directory of slack json files, converts them to a
 import json, sys
 import os, csv
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from cleantext import clean
 from tqdm.auto import tqdm
 import pandas as pd
@@ -29,7 +29,6 @@ def handle_annotated_mention(matchobj):
     """
     handle_annotated_mention - handles the case where a mention is annotated with a user id
     """
-    global user
     if isinstance(matchobj, list):
         matchobj = "".join(matchobj)
     return "@{}".format((matchobj.group(0)[2:-1]).split("|")[1])
@@ -39,7 +38,6 @@ def handle_mention(matchobj):
     """
     handle_mention - handles the general case where a mention is not annotated with a user id
     """
-    global user
     if isinstance(matchobj, list):
         matchobj = "".join(matchobj)
     matched_user = remove_string_extras(matchobj.group(0))
@@ -71,7 +69,7 @@ if __name__ == "__main__":
     content_list = []
     userlist = []
     f = open(outcsv_file, "w", encoding="utf-8", errors="ignore")
-    user = {}
+    users_by_id = {}
     with open(userjson, "r", errors="replace") as user_data:
         userlist = json.load(user_data)
         try:
@@ -85,7 +83,7 @@ if __name__ == "__main__":
                     realname = clean(userdata["name"])
                 if verbose:
                     print(f"realname for user {userid} is {realname}")
-                user[userid] = [realname]
+                users_by_id[userid] = realname
         except KeyError as e:
             print(f"KeyError: {e}\n\n User data: {userid}")
             sys.exit(1)
@@ -120,12 +118,8 @@ if __name__ == "__main__":
                         else:
                             user = clean(_user_prof["name"])
                     else:
-                        # do the weird lookup they normally do
-                        _user_cur = (
-                            user[item["user"]] if item["user"] in user else ["unknown"]
-                        )
-                        user = clean(_user_cur[0])
-                    ts = datetime.utcfromtimestamp(float(item["ts"]))
+                        user = clean(users_by_id.get(item.get("user"), "unknown"))
+                    ts = datetime.fromtimestamp(float(item["ts"]), tz=timezone.utc)
                     time = clean(ts.strftime("%Y-%m-%d %H:%M:%S"))
                     text = clean(transform_text(item["text"]))
                     channel = (
@@ -136,10 +130,8 @@ if __name__ == "__main__":
                     csvwriter.writerow([time, user, text, channel])
         pbar.update(1)
     pbar.close()
+    f.close()
 
     if verbose:
-
         df = pd.read_csv(outcsv_file, quoting=csv.QUOTE_MINIMAL)
         print(f"A preview of the generated dataframe is:\n{df.head()}")
-
-    f.close()
